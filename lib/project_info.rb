@@ -25,4 +25,4 @@ fm_results['status'] = project['status']
 
 fm_results['data'] = project['data']
 
-puts stock_data(fm_results['data'])
+File.write('../spec/fixtures/finmind_results.yml', fm_results.to_yaml)
