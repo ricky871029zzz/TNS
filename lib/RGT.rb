@@ -36,7 +36,6 @@ module CodePraise
     def get_jason
       parameter = @parameter.to_a.map { |x| x.join('=') }.join('&')
       rgt_url = gt_api_path(parameter)
-      puts rgt_url
       rgt_data = call_gt_url(rgt_url).parse
       RGTt.new(rgt_data, self)
     end
