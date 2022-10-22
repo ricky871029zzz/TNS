@@ -10,7 +10,7 @@ end
 
 desc 'run tests'
 task :spec do
-  sh 'ruby spec/fm_api_spec.rb'
+  sh 'ruby spec/rgt_api_spec.rb'
 end
 
 namespace :vcr do
