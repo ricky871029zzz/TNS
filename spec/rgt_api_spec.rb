@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require_relative 'spec_helper'
+require_relative 'spec_helper_rgt'
 
 
 
-describe 'Tests RGT API library' do
+describe 'Tests rgt API library' do
   VCR.configure do |c|
     c.cassette_library_dir= CASSETTES_FOLDER
     c.hook_into:webmock
