@@ -6,5 +6,10 @@ module CodePraise
       @rgt = rgt_data
       @rgt_source = rgt_source
     end
+    
+    def get_rgt
+      @rgt
+    end
+    
   end
 end

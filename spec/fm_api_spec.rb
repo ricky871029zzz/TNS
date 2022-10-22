@@ -1,26 +1,31 @@
-require 'minitest/autorun'
-require 'minitest/rg'
-require 'yaml'
-require_relative '../lib/finmind_api.rb'
-
-CORRECT = YAML.safe_load(File.read('fixtures/finmind_results.yml'))
+require_relative 'spec_helper'
 
 describe 'Tests FinMind API library' do
-  stock = CodePraise::FinMindApi.new
-  stock.dataset("TaiwanStockInfo")
+  VCR.configure do |c|
+    c.cassette_library_dir= CASSETTES_FOLDER
+    c.hook_into:webmock
+  end
+  
+  before do
+    VCR.insert_cassette CASSETTE_FILE, record: :new_episodes, match_requests_on: %i[method uri headers]
+  end
+  
+  after do
+  VCR.eject_cassette
+  end
+
+  stocks = CodePraise::FinMindApi.new
+  stocks.dataset("TaiwanStockInfo")
+  
   describe 'Status' do
     it 'stock_dataset' do
-      _(stock.stock.get_stock["status"]).must_equal CORRECT["status"]
+      _(stocks.finMind.get_stock["status"]).must_equal CORRECT["status"]
     end
   end
+  
   describe 'Msg' do
     it 'stock_dataset' do
-       _(stock.stock.get_stock["msg"]).must_equal CORRECT["msg"]
-    end
-  end
-  describe 'Data' do
-    it 'stock_dataset' do
-       _(stock.stock.get_stock["data"]).must_equal CORRECT["data"]
+       _(stocks.finMind.get_stock["msg"]).must_equal CORRECT["msg"]
     end
   end
 end

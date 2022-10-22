@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'yaml'
 require 'google_search_results' 
 require 'http'
 require_relative 'RGTt'
@@ -7,6 +8,7 @@ require_relative 'RGTt'
 module CodePraise
   class RGT
     API_PROJECT_ROOT = 'https://serpapi.com/search.json?'
+    
 
     module Errors
       class NotFound < StandardError; end
@@ -23,11 +25,12 @@ module CodePraise
     attr_accessor :parameter
 
     def initialize(name)
+      config = YAML.safe_load(File.read('config/secret.yml'))
       @parameter = {
         engine: "google_trends",
         q: name,
         data_type: "TIMESERIES",   
-        api_key: "da4bf99b1c382584e582032bcdb8bc698e024a83c5b9d9f44b1c24dd9d7fcbbc",    
+        api_key: config['api_key']    
       }
     end
 
@@ -36,6 +39,7 @@ module CodePraise
     def get_jason
       parameter = @parameter.to_a.map { |x| x.join('=') }.join('&')
       rgt_url = gt_api_path(parameter)
+      puts rgt_url
       rgt_data = call_gt_url(rgt_url).parse
       RGTt.new(rgt_data, self)
     end
@@ -54,6 +58,5 @@ module CodePraise
     def successful?(result)
       !HTTP_ERROR.keys.include?(result.code)
     end
-
   end
 end

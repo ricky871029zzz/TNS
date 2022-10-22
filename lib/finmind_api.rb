@@ -5,19 +5,7 @@ require_relative 'finmind'
 
 module CodePraise
   class FinMindApi
-    API_PROJECT_ROOT = 'https://api.finmindtrade.com/api/v4/data?'
-
-    module Errors
-      class NotFound < StandardError; end
-      class Unauthorized < StandardError; end
-      class UnprocessableEntity < StandardError; end
-    end
-
-    HTTP_ERROR = {
-      401 => Errors::Unauthorized,
-      404 => Errors::NotFound,
-      422 => Errors::UnprocessableEntity
-    }.freeze
+    FM_PATH = 'https://api.finmindtrade.com/api/v4/data?'
 
     attr_reader :parameter
 
@@ -57,26 +45,45 @@ module CodePraise
       @parameter.delete('end_date')
     end
 
-    def stock
-      parameter = @parameter.to_a.map { |col| col.join('=') }.join('&')
-      stock_url = fm_api_path(parameter)
-      stock_data = call_fm_url(stock_url).parse
+    def finMind
+      stock_data = Request.new(FM_PATH).fm(@parameter).parse
       FinMind.new(stock_data, self)
     end
 
-    private
+    class Request
+      def initialize(resource_root)
+        @resource_root = resource_root
+      end
 
-    def fm_api_path(path)
-      "#{API_PROJECT_ROOT}#{path}"
+      def fm(parameter)
+        get(@resource_root + parameter.to_a.collect { |col| col.join('=') }.join('&'))
+      end
+
+      def get(url)
+        http_response = HTTP.get(url)
+
+        Response.new(http_response).tap do |response|
+          raise(response.error) unless response.successful?
+        end
+      end
     end
 
-    def call_fm_url(url)
-      result = HTTP.get(url)
-      successful?(result) ? result : raise(HTTP_ERROR[result.code])
-    end
+    class Response < SimpleDelegator
+      Unauthorized = Class.new(StandardError)
+      NotFound = Class.new(StandardError)
 
-    def successful?(result)
-      !HTTP_ERROR.keys.include?(result.code)
+      HTTP_ERROR = {
+        401 => Unauthorized,
+        404 => NotFound,
+      }.freeze
+
+      def successful?
+        HTTP_ERROR.keys.none?(code)
+      end
+
+      def error
+        HTTP_ERROR[code]
+      end
     end
   end
 end
