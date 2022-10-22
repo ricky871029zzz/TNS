@@ -7,20 +7,7 @@ require_relative 'rgt_api'
 module CodePraise
   class RGT
     API_PROJECT_ROOT = 'https://serpapi.com/search.json?'
-    
-
-    module Errors
-      class NotFound < StandardError; end
-      class Unauthorized < StandardError; end
-      class UnprocessableEntity < StandardError; end
-    end
-
-    HTTP_ERROR = {
-      401 => Errors::Unauthorized,
-      404 => Errors::NotFound,
-      422 => Errors::UnprocessableEntity
-      }.freeze
-
+  
     attr_accessor :parameter
 
     def initialize(name)
@@ -36,26 +23,49 @@ module CodePraise
 
 
     def get_jason
-      parameter = @parameter.to_a.map { |x| x.join('=') }.join('&')
-      rgt_url = gt_api_path(parameter)
-      puts rgt_url
-      rgt_data = call_gt_url(rgt_url).parse
+      rgt_data = Request.new(API_PROJECT_ROOT).rgt(@parameter).parse
       RGTt.new(rgt_data, self)
     end
 
-    private
 
-    def gt_api_path(path)
-      "#{API_PROJECT_ROOT}#{path}"
+    class Request
+      def initialize(resource_root)
+        @resource_root = resource_root
+      end
+
+      def rgt(parameter)
+        get(@resource_root + parameter.to_a.collect { |col| col.join('=') }.join('&'))
+      end
+
+      def get(url)
+        http_response = HTTP.get(url)
+
+        Response.new(http_response).tap do |response|
+          raise(response.error) unless response.successful?
+        end
+      end
     end
+    # Decorates HTTP responses from FinMind with success/error reporting
+    class Response < SimpleDelegator
+      
+      # Response when get Http status code 401 (Unauthorized)
+      Unauthorized = Class.new(StandardError)
 
-    def call_gt_url(url)
-      result = HTTP.get(url)
-      successful?(result) ? result : raise(HTTP_ERROR[result.code])
-    end
+      # Response when get Http status code 404 (Not Found)
+      NotFound = Class.new(StandardError)
 
-    def successful?(result)
-      !HTTP_ERROR.keys.include?(result.code)
+      HTTP_ERROR = {
+        401 => Unauthorized,
+        404 => NotFound,
+      }.freeze
+
+      def successful?
+        HTTP_ERROR.keys.none?(code)
+      end
+
+      def error
+        HTTP_ERROR[code]
+      end
     end
   end
 end
