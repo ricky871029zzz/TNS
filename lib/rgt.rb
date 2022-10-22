@@ -5,10 +5,11 @@ require 'http'
 require_relative 'rgt_api'
 
 module CodePraise
+  # access google trend
   class RGT
     API_PROJECT_ROOT = 'https://serpapi.com/search.json?'
   
-    attr_accessor :parameter
+    attr_reader :parameter
 
     def initialize(name)
       config = YAML.safe_load(File.read('config/secrets.yml'))
@@ -27,7 +28,7 @@ module CodePraise
       RGTt.new(rgt_data, self)
     end
 
-
+    #get data by url
     class Request
       def initialize(resource_root)
         @resource_root = resource_root

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module CodePraise
+  #get data
   class RGTt
     def initialize(rgt_data, rgt_source)
       @rgt = rgt_data
