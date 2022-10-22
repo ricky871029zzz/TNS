@@ -14,7 +14,7 @@ describe 'Tests FinMind API library' do
   VCR.eject_cassette
   end
 
-  stocks = CodePraise::FinMindApi.new
+  stocks = FinMindAPI::FinMindApi.new
   stocks.dataset("TaiwanStockInfo")
   
   describe 'Status' do

@@ -3,7 +3,8 @@
 require 'http'
 require_relative 'finmind'
 
-module CodePraise
+module FinMindAPI
+  # Client Library for FinMind API
   class FinMindApi
     FM_PATH = 'https://api.finmindtrade.com/api/v4/data?'
 
@@ -50,6 +51,7 @@ module CodePraise
       FinMind.new(stock_data, self)
     end
 
+    # Sends out HTTP requests to FinMind
     class Request
       def initialize(resource_root)
         @resource_root = resource_root
@@ -68,8 +70,13 @@ module CodePraise
       end
     end
 
+    # Decorates HTTP responses from FinMind with success/error reporting
     class Response < SimpleDelegator
+      
+      # Response when get Http status code 401 (Unauthorized)
       Unauthorized = Class.new(StandardError)
+
+      # Response when get Http status code 404 (Not Found)
       NotFound = Class.new(StandardError)
 
       HTTP_ERROR = {

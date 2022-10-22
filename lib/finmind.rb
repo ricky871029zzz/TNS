@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-module CodePraise
+module FinMindAPI
+
+  # Model for Stock
   class FinMind
     def initialize(stock_data, data_source)
       @stock = stock_data
