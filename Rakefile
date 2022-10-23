@@ -8,9 +8,18 @@ task :default do
   puts `rake -T`
 end
 
-desc 'run tests'
-task :spec do
-  sh 'ruby spec/fm_api_spec.rb'
+namespace :test do
+  
+  desc 'run fm tests'
+  task :fm_spec do
+    sh 'ruby spec/fm_api_spec.rb'
+  end
+  
+  desc 'run twse tests'
+  task :twse_spec do
+    sh 'ruby spec/twse_api_spec.rb'
+  end
+  
 end
 
 namespace :vcr do
